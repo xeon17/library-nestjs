@@ -1,0 +1,171 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Project "Library" {
+  database_type: 'PostgreSQL'
+  Note: 'Library Management System'
+}
+
+Table users {
+  id Int [pk, increment]
+  name String [not null]
+  email String [unique, not null]
+  role Role [not null, default: 'STUDENT']
+  password String [not null]
+  passwordConfirm String
+  passwordChangedAt DateTime
+  passwordResetToken String
+  passwordResetExpires DateTime
+  username String [unique, not null]
+  photo String [default: '/default.png']
+  gender String
+  birthDate DateTime
+  address String
+  city String
+  country String
+  loginCount Int [default: 0]
+  reservationsMadeBy reservations [not null]
+  reservationsMadeFor reservations [not null]
+  rentsMadeBy rents [not null]
+  rentsBorrowedBy rents [not null]
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+  active Boolean [default: true]
+  lastLogin DateTime
+}
+
+Table categories {
+  id Int [pk, increment]
+  name String [unique, not null]
+  books books [not null]
+}
+
+Table letters {
+  id Int [pk, increment]
+  name String [unique, not null]
+  books books [not null]
+}
+
+Table publishers {
+  id Int [pk, increment]
+  name String [unique, not null]
+  books books [not null]
+}
+
+Table authors {
+  id Int [pk, increment]
+  name String [unique, not null]
+  biography String [not null]
+  photo String [default: '/default.png']
+  wikipedia String
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+  books books [not null]
+}
+
+Table genres {
+  id Int [pk, increment]
+  name String [unique, not null]
+  books books [not null]
+}
+
+Table languages {
+  id Int [pk, increment]
+  name String [unique, not null]
+  books books [not null]
+}
+
+Table formats {
+  id Int [pk, increment]
+  name String [unique, not null]
+  books books [not null]
+}
+
+Table books {
+  id Int [pk, increment]
+  title String [unique, not null]
+  pageCount Int [not null]
+  summary String [not null]
+  categories categories [not null]
+  isbn String [unique, not null]
+  authors authors [not null]
+  genres genres [not null]
+  letter letters [not null]
+  letterId Int [not null]
+  publisher publishers [not null]
+  publisherId Int [not null]
+  language languages [not null]
+  languageId Int [not null]
+  format formats [not null]
+  formatId Int [not null]
+  reservations reservations [not null]
+  rents rents [not null]
+  releaseDate DateTime [not null]
+  quantityCount Int [not null, default: 1]
+  reservedCount Int [not null, default: 0]
+  rentedCount Int [not null, default: 0]
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+}
+
+Table reservations {
+  id Int [pk, increment]
+  book books [not null]
+  bookId Int [not null]
+  reservedBy users [not null]
+  reservedById Int [not null]
+  reservedFor users [not null]
+  reservedForId Int [not null]
+  reservedAt DateTime [default: `now()`]
+  closedAt DateTime
+  requestedAt DateTime
+  closureReason cancelation_reasons
+  closureReasonId Int
+}
+
+Table rents {
+  id Int [pk, increment]
+  book books [not null]
+  bookId Int [not null]
+  rentedBy users [not null]
+  rentedById Int [not null]
+  borrowedBy users [not null]
+  borrowedById Int [not null]
+  issueDate DateTime
+  returnDate DateTime
+}
+
+Table cancelation_reasons {
+  id Int [pk, increment]
+  name String [unique, not null]
+  Reservation reservations [not null]
+}
+
+Enum Role {
+  STUDENT
+  LIBRARIAN
+  ADMIN
+}
+
+Ref: books.letterId > letters.id
+
+Ref: books.publisherId > publishers.id
+
+Ref: books.languageId > languages.id
+
+Ref: books.formatId > formats.id
+
+Ref: reservations.bookId > books.id
+
+Ref: reservations.reservedById > users.id
+
+Ref: reservations.reservedForId > users.id
+
+Ref: reservations.closureReasonId > cancelation_reasons.id
+
+Ref: rents.bookId > books.id
+
+Ref: rents.rentedById > users.id
+
+Ref: rents.borrowedById > users.id

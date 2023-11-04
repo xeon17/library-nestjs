@@ -1,0 +1,188 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator dbml {
+  provider              = "prisma-dbml-generator"
+  projectName           = "Library"
+  projectDatabaseType   = "PostgreSQL"
+  projectNote           = "Library Management System"
+  includeRelationFields = true
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   Int           @id @default(autoincrement())
+  name                 String
+  email                String        @unique
+  role                 Role          @default(STUDENT)
+  password             String
+  passwordConfirm      String?       @map("password_confirm")
+  passwordChangedAt    DateTime?     @map("password_changed_at")
+  passwordResetToken   String?       @map("password_reset_token")
+  passwordResetExpires DateTime?     @map("password_reset_expires")
+  username             String        @unique
+  photo                String?       @default("/default.png")
+  gender               String?
+  birthDate            DateTime?     @map("birth_date")
+  address              String?
+  city                 String?
+  country              String?
+  loginCount           Int?          @default(0) @map("login_count")
+  reservationsMadeBy   Reservation[] @relation("UserReservationsMadeBy")
+  reservationsMadeFor  Reservation[] @relation("UserReservationsMadeFor")
+  rentsMadeBy          Rent[]        @relation("UserRentMadeBy")
+  rentsBorrowedBy      Rent[]        @relation("UserBorrowedBy")
+
+  createdAt DateTime? @default(now()) @map("created_date")
+  updatedAt DateTime? @updatedAt @map("updated_date")
+  active    Boolean?  @default(true)
+  lastLogin DateTime? @map("last_login")
+
+  @@map("users")
+}
+
+enum Role {
+  STUDENT
+  LIBRARIAN
+  ADMIN
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  books Book[]
+
+  @@map("categories")
+}
+
+model Letter {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  books Book[]
+
+  @@map("letters")
+}
+
+model Publisher {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  books Book[]
+
+  @@map("publishers")
+}
+
+model Author {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  biography String
+  photo     String?   @default("/default.png")
+  wikipedia String?
+  createdAt DateTime? @default(now()) @map("created_date")
+  updatedAt DateTime? @updatedAt @map("updated_date")
+
+  books Book[]
+
+  @@map("authors")
+}
+
+model Genre {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  books Book[]
+
+  @@map("genres")
+}
+
+model Language {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  books Book[]
+
+  @@map("languages")
+}
+
+model Format {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  books Book[]
+
+  @@map("formats")
+}
+
+model Book {
+  id            Int           @id @default(autoincrement())
+  title         String        @unique
+  pageCount     Int           @map("page_count")
+  summary       String
+  categories    Category[]
+  isbn          String        @unique
+  authors       Author[]
+  genres        Genre[]
+  letter        Letter        @relation(fields: [letterId], references: [id])
+  letterId      Int           @map("letter_id")
+  publisher     Publisher     @relation(fields: [publisherId], references: [id])
+  publisherId   Int           @map("publisher_id")
+  language      Language      @relation(fields: [languageId], references: [id])
+  languageId    Int           @map("language_id")
+  format        Format        @relation(fields: [formatId], references: [id])
+  formatId      Int           @map("format_id")
+  reservations  Reservation[]
+  rents         Rent[]
+  releaseDate   DateTime      @map("release_date")
+  quantityCount Int           @default(1) @map("quantity_count")
+  reservedCount Int           @default(0) @map("reserved_count")
+  rentedCount   Int           @default(0) @map("rented_count")
+  createdAt     DateTime?     @default(now()) @map("created_date")
+  updatedAt     DateTime?     @updatedAt @map("updated_date")
+
+  @@map("books")
+}
+
+model Reservation {
+  id     Int  @id @default(autoincrement())
+  book   Book @relation(fields: [bookId], references: [id])
+  bookId Int  @map("book_id")
+
+  reservedBy   User @relation("UserReservationsMadeBy", fields: [reservedById], references: [id])
+  reservedById Int  @map("reserved_by_id")
+
+  reservedFor   User @relation("UserReservationsMadeFor", fields: [reservedForId], references: [id])
+  reservedForId Int  @map("reserved_for_id")
+
+  reservedAt DateTime? @default(now()) @map("reserved_date")
+  closedAt   DateTime? @map("closed_date")
+
+  requestedAt DateTime? @map("request_date")
+
+  closureReason   CancelationReason? @relation(fields: [closureReasonId], references: [id])
+  closureReasonId Int?               @map("closure_reason_id")
+
+  @@map("reservations")
+}
+
+model Rent {
+  id           Int       @id @default(autoincrement())
+  book         Book      @relation(fields: [bookId], references: [id])
+  bookId       Int       @map("book_id")
+  rentedBy     User      @relation("UserRentMadeBy", fields: [rentedById], references: [id])
+  rentedById   Int       @map("rented_by_id")
+  borrowedBy   User      @relation("UserBorrowedBy", fields: [borrowedById], references: [id])
+  borrowedById Int       @map("borrowed_by_id")
+  issueDate    DateTime? @map("issue_date")
+  returnDate   DateTime? @map("return_date")
+
+  @@map("rents")
+}
+
+model CancelationReason {
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
+  Reservation Reservation[]
+
+  @@map("cancelation_reasons")
+}
