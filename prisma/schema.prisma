@@ -144,21 +144,16 @@ model Book {
 }
 
 model Reservation {
-  id     Int  @id @default(autoincrement())
-  book   Book @relation(fields: [bookId], references: [id])
-  bookId Int  @map("book_id")
-
-  reservedBy   User @relation("UserReservationsMadeBy", fields: [reservedById], references: [id])
-  reservedById Int  @map("reserved_by_id")
-
-  reservedFor   User @relation("UserReservationsMadeFor", fields: [reservedForId], references: [id])
-  reservedForId Int  @map("reserved_for_id")
-
-  reservedAt DateTime? @default(now()) @map("reserved_date")
-  closedAt   DateTime? @map("closed_date")
-
-  requestedAt DateTime? @map("request_date")
-
+  id              Int                @id @default(autoincrement())
+  book            Book               @relation(fields: [bookId], references: [id])
+  bookId          Int                @map("book_id")
+  reservedBy      User               @relation("UserReservationsMadeBy", fields: [reservedById], references: [id])
+  reservedById    Int                @map("reserved_by_id")
+  reservedFor     User               @relation("UserReservationsMadeFor", fields: [reservedForId], references: [id])
+  reservedForId   Int                @map("reserved_for_id")
+  reservedAt      DateTime?          @default(now()) @map("reserved_date")
+  closedAt        DateTime?          @map("closed_date")
+  requestedAt     DateTime?          @map("request_date")
   closureReason   CancelationReason? @relation(fields: [closureReasonId], references: [id])
   closureReasonId Int?               @map("closure_reason_id")
 
